@@ -31,4 +31,10 @@ export class BoardsService {
     this.boards.push(board);
     return board;
   }
+
+  updateBoardStatus(id: string, status: BoardStatus): Board {
+    const board = this.findBoardById(id);
+    board.status = status;
+    return board;
+  }
 }
