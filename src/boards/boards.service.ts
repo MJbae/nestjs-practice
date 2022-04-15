@@ -1,53 +1,49 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Board, BoardStatus } from './board.model';
-import { v1 as uuid } from 'uuid';
+import { BoardStatus } from './board-status.enum';
+import { BoardRepository } from './board.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Board } from './board.entity';
 import { CreateBoardDto } from './dtos/create-board.dto';
 
 @Injectable()
 export class BoardsService {
-  private boards: Board[] = [];
+  constructor(
+    @InjectRepository(BoardRepository)
+    private boardRepository: BoardRepository,
+  ) {}
 
-  getAllboards(): Board[] {
-    return this.boards;
+  async getAllBoards(): Promise<Board[]> {
+    return this.boardRepository.find();
   }
 
-  findBoardById(id: string): Board {
-    const board = this.boards.find((board) => board.id === id);
+  createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+    return this.boardRepository.createBoard(createBoardDto);
+  }
 
-    if (!board) {
-      throw new NotFoundException(`Cannot find board with ${id}`);
+  async getBoardById(id: any): Promise<Board> {
+    const found = await this.boardRepository.findOne(id);
+
+    if (!found) {
+      throw new NotFoundException(`Can't find Board with id ${id}`);
     }
 
-    return board;
+    return found;
   }
 
-  removeBoard(id: string) {
-    const found = this.findBoardById(id);
+  async deleteBoard(id: number): Promise<void> {
+    const result = await this.boardRepository.delete(id);
 
-    this.boards = this.boards.filter((board) => board.id != found.id);
-  }
-
-  createBoard(CreateBoardDto: CreateBoardDto): Board {
-    const { title, discription } = CreateBoardDto;
-    const board: Board = {
-      id: uuid(),
-      title,
-      discription,
-      status: BoardStatus.PUBLIC,
-    };
-
-    this.boards.push(board);
-    return board;
-  }
-
-  updateBoardStatus(id: string, status: BoardStatus): Board {
-    const board = this.findBoardById(id);
-
-    if (!board) {
-      throw new NotFoundException(`Cannot find board with ${id}`);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Can't find Board with id ${id}`);
     }
+  }
+
+  async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+    const board = await this.getBoardById(id);
 
     board.status = status;
+    await this.boardRepository.save(board);
+
     return board;
   }
 }
