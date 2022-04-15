@@ -22,7 +22,9 @@ export class BoardsService {
   }
 
   removeBoard(id: string) {
-    this.boards = this.boards.filter((board) => board.id != id);
+    const found = this.findBoardById(id);
+
+    this.boards = this.boards.filter((board) => board.id != found.id);
   }
 
   createBoard(CreateBoardDto: CreateBoardDto): Board {
