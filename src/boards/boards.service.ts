@@ -40,6 +40,11 @@ export class BoardsService {
 
   updateBoardStatus(id: string, status: BoardStatus): Board {
     const board = this.findBoardById(id);
+
+    if (!board) {
+      throw new NotFoundException(`Cannot find board with ${id}`);
+    }
+
     board.status = status;
     return board;
   }
