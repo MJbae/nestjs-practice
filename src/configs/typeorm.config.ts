@@ -5,7 +5,8 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   host: 'localhost',
   port: 3306,
   username: 'root',
-  password: 'test',
+  password: 'mysql123456',
   database: 'board-app',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
+  synchronize: true,
 };
